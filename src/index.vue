@@ -1,0 +1,165 @@
+<template>
+  <el-container class="home-container">
+    <el-header>
+      <div class="header-left">
+        <!-- <img src="" alt="logo" class="logo"> -->
+        <span>虚拟币后台管理系统</span>
+      </div>
+      <el-button type="warning" plain @click="logout">退出</el-button>
+    </el-header>
+    <el-container>
+      <el-aside width="205px" class="menu-container">
+        <el-menu background-color="#4A90E2" text-color="#fff" active-text-color="#ffd04b" router="true">
+          <el-menu-item @click="backToFirst">
+            <i class="el-icon-s-home"></i>
+            <span>首页</span>
+          </el-menu-item>
+          <el-submenu index="1">
+            <template slot="title">
+              <i class="el-icon-user"></i>
+              <span>用户管理</span>
+            </template>
+            <el-menu-item index="/User">
+              <i class="el-icon-s-custom"></i>
+              <span>用户信息管理</span>
+            </el-menu-item>
+            <el-menu-item index="/team">
+              <i class="el-icon-s-cooperation"></i>
+              <span>团队信息管理</span>
+            </el-menu-item>
+          </el-submenu>
+          <el-submenu index="2">
+            <template slot="title">
+              <i class="el-icon-s-goods"></i>
+              <span>物品管理</span>
+            </template>
+            <el-menu-item index="/rent">
+              <i class="el-icon-s-marketing"></i>
+              <span>物品价格管理</span>
+            </el-menu-item>
+            <el-menu-item index="/return">
+              <i class="el-icon-document"></i>
+              <span>物品租借申请管理</span>
+            </el-menu-item>
+          </el-submenu>
+          <el-menu-item index="/crypto">
+            <i class="el-icon-coin"></i>
+            <span>虚拟币信息管理</span>
+          </el-menu-item>
+          <el-menu-item index="4">
+            <i class="el-icon-s-management"></i>
+            <span>工位租借管理</span>
+          </el-menu-item>
+        </el-menu>
+      </el-aside>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
+    </el-container>
+  </el-container>
+</template>
+
+<script>
+import axios from 'axios';
+export default {
+
+  data() {
+    return {
+      menulist: [],
+    };
+  },
+  created() {
+    // this.getMenuList();
+  },
+  methods: {
+    backToFirst() {
+      this.$router.push({ path: '/' });
+    },
+    logout() {
+      window.sessionStorage.clear();
+      this.$router.push({ path: 'login' });
+    },
+    // async getMenuList() {
+    //   const { data: res } = await this.axios.get('menus');
+    //   if (res.meta.status != 200) return this.$message.error(res.meta.msg);
+    //   this.menulist = res.data;
+    // },
+  },
+};
+</script>
+
+<style lang="less" scoped>
+.home-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.el-header {
+  background-color: #4a90e2;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 20px;
+  color: #fff;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      margin-right: 15px;
+    }
+
+    span {
+      font-weight: bold;
+      font-size: 22px;
+    }
+  }
+
+  .el-button {
+    font-size: 16px;
+    color: #fff;
+    border-color: #ff6b6b;
+
+    &:hover {
+      background-color: #ff6b6b;
+      color: #fff;
+    }
+  }
+}
+
+.menu-container {
+  background-color: #4a90e2;
+  min-width: 205px;
+}
+
+.el-menu {
+  background-color: #4a90e2;
+
+  .el-menu-item,
+  .el-submenu__title {
+    color: #ffffff;
+    font-weight: bold;
+
+    &:hover {
+      background-color: #6fa2fd;
+    }
+  }
+
+  .el-menu-item.is-active,
+  .el-submenu__title.is-active {
+    color: #ffd04b;
+    background-color: #6fa2fd;
+  }
+}
+
+.el-main {
+  background-color: #f5f6fa;
+  padding: 20px;
+  overflow-y: auto;
+}
+</style>
