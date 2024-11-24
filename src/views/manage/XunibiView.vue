@@ -43,11 +43,11 @@
 
 
 
-            <el-tabs type="border-card" style="width: 1000px;" @tab-click="handleTabClick">
-                <el-tab-pane label="支出数据">
+            <el-tabs type="border-card" style="width: 100%;" @tab-click="handleTabClick">
+                <el-tab-pane label="支出数据" :lazy="true">
                     <IncomeComponent :chartData="charExpData"></IncomeComponent>
                 </el-tab-pane>
-                <el-tab-pane label="收入数据">
+                <el-tab-pane label="收入数据" :lazy="true">
                     <IncomeComponent :chartData="charData"></IncomeComponent>
                 </el-tab-pane>
                 <el-tab-pane label="团队数据">

@@ -18,9 +18,9 @@ export default {
         };
     },
     mounted() {
-        // window.onload = () => {
-        //     this.initChart(); // 在窗口完全加载后初始化图表
-        // };
+        // // window.onload = () => {
+        // //     this.initChart(); // 在窗口完全加载后初始化图表
+        // // };
         this.$nextTick(() => {
             this.initChart(); // 等待 DOM 渲染完成后初始化图表
         });
@@ -34,13 +34,7 @@ export default {
         chartData: {
             immediate: true,
             handler(newValue) {
-                if (this.IncomeChart) {
-                    this.IncomeChart.setOption({
-                        dataset: {
-                            source: newValue,
-                        },
-                    });
-                }
+                this.updateChart(newValue);
             },
         },
     },
@@ -53,6 +47,22 @@ export default {
         initChart() {
             const chartDom = this.$refs.IncomeChart;
             this.IncomeChart = echarts.init(chartDom);
+            const series = this.chartData[0].slice(1).map(() => ({
+                type: "line",
+                smooth: true,
+                seriesLayoutBy: "row",
+                emphasis: { focus: "series" },
+            }));
+
+            series.push({
+                type: "pie",
+                id: "pie",
+                radius: "30%",
+                center: ["50%", "25%"],
+                emphasis: { focus: "self" },
+                label: { formatter: "{b}: {@currentMonth} ({d}%)" },
+                encode: { itemName: "product", value: "currentMonth", tooltip: "currentMonth" },
+            });
 
             const option = {
                 legend: {},
@@ -66,21 +76,7 @@ export default {
                 xAxis: { type: "category" },
                 yAxis: { gridIndex: 0 },
                 grid: { top: "55%" },
-                series: [
-                    { type: "line", smooth: true, seriesLayoutBy: "row", emphasis: { focus: "series" } },
-                    { type: "line", smooth: true, seriesLayoutBy: "row", emphasis: { focus: "series" } },
-                    { type: "line", smooth: true, seriesLayoutBy: "row", emphasis: { focus: "series" } },
-                    { type: "line", smooth: true, seriesLayoutBy: "row", emphasis: { focus: "series" } },
-                    {
-                        type: "pie",
-                        id: "pie",
-                        radius: "30%",
-                        center: ["50%", "25%"],
-                        emphasis: { focus: "self" },
-                        label: { formatter: "{b}: {@currentMonth} ({d}%)" },
-                        encode: { itemName: "product", value: "currentMonth", tooltip: "currentMonth" },
-                    },
-                ],
+                series
             };
 
             this.IncomeChart.setOption(option);
@@ -98,6 +94,34 @@ export default {
                     });
                 }
             });
+        },
+        updateChart(newValue) {
+            if (this.IncomeChart) {
+                const series = newValue[0].slice(1).map(() => ({
+                    type: "line",
+                    smooth: true,
+                    seriesLayoutBy: "row",
+                    emphasis: { focus: "series" },
+                }));
+
+                series.push({
+                    type: "pie",
+                    id: "pie",
+                    radius: "30%",
+                    center: ["50%", "25%"],
+                    emphasis: { focus: "self" },
+                    label: { formatter: "{b}: {@currentMonth} ({d}%)" },
+                    encode: { itemName: "product", value: "currentMonth", tooltip: "currentMonth" },
+                });
+
+                this.IncomeChart.setOption({
+                    dataset: {
+                        source: newValue,
+                    },
+                    series,
+                });
+            }
+
         },
     },
 };
