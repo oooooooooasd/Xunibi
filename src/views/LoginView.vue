@@ -1,10 +1,9 @@
 <template>
     <div class="login-body">
         <div class="login-container">
-            <h1 class="logo">ziyanbokeSystem</h1>
             <el-card class="login-card">
                 <template #header>
-                    <div class="card-header">用户登录</div>
+                    <div class="card-header">管理员登录</div>
                 </template>
                 <div class="login-form">
                     <el-form v-model="loginForm" label-width="100px">
@@ -14,9 +13,7 @@
                         <el-form-item label="密码：" prop="password">
                             <el-input type="password" v-model="loginForm.password" placeholder="请输入密码" />
                         </el-form-item>
-                        <el-form-item label="验证码：" prop="code">
-                            <el-button color="#626aef" style="width: 200px;">获取验证码</el-button>
-                        </el-form-item>
+
                         <el-button class="login-btn" type="primary" @click="Login">登录</el-button>
                         <div class="register-link">
                             <a @click="toRegister">还没有账号? 点击注册</a>

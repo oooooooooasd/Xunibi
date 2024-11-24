@@ -21,7 +21,8 @@ const routes = [
       { path: 'crypto', name: 'XunibiView', component: () => import('../views/manage/XunibiView.vue') },
       { path: 'rent', name: "RentView", component: () => import('../views/manage/RentView.vue') },
       { path: 'return', name: "ReturnView", component: () => import('../views/manage/ReturnView.vue') },
-      { path: 'team', name: "TeamView", component: () => import("../views/manage/TeamView.vue") }
+      { path: 'team', name: "TeamView", component: () => import("../views/manage/TeamView.vue") },
+      { path: 'review', name: "ReviewView", component: () => import("../views/manage/MaterialReviewView.vue") }
     ]
   },
 

@@ -1,93 +1,301 @@
 <template>
-    <div class="container">
-        <div class="header">
-            <el-input v-model="searchQuery" placeholder="请输入物品名称" style="width: 250px"></el-input>
-            <el-button type="info" plain @click="search">查询</el-button>
-            <el-button type="warning" plain @click="reset">重置</el-button>
-            <el-button type="primary" plain @click="handleAdd">新增</el-button>
-        </div>
+    <div>
+        <!-- Tabs for switching between tables -->
+        <el-tabs type="border-card" v-model="activeTab">
+            <el-tab-pane label="工位" name="工位">
+                <RentTable :columns="columns" :data="tableData" @search="searchStationTable" @reset="resetStationTable"
+                    @add="handleAddStation" @edit="handleEditStation" @delete="deleteStationRow">
 
-        <div class="table-wrapper">
-            <el-table ref="filterTable" :data="tableData" style="width: 100%" border>
-                <el-table-column prop="type" label="物品名称" align="center">
-                </el-table-column>
-                <el-table-column prop="coin_comspution" label="虚拟币价格" align="center">
-                </el-table-column>
-                <el-table-column prop="tag" label="标签" align="center"
-                    :filters="[{ text: '工位', value: '工位' }, { text: '相机', value: '相机' }, { text: '其余设备', value: '其余设备' }]"
-                    :filter-method="filterTag" filter-placement="bottom-end">
-                    <template slot-scope="scope">
-                        <el-tag :type="scope.row.tag === '工位' ? 'primary' : 'success'">{{ scope.row.tag }}</el-tag>
+                    <template #isAvailableSlot="{ scope }">
+                        <span :style="{ color: scope.row.isAvailable ? 'green' : 'red' }">
+                            {{ scope.row.isAvailable ? '可用' : '不可用' }}
+                        </span>
                     </template>
-                </el-table-column>
-                <el-table-column label="操作" align="center">
-                    <template v-slot="scope">
-                        <el-button size="mini" type="primary" plain @click="handleEdit(scope.row)">编辑</el-button>
-                        <el-button size="mini" type="danger" plain @click="del(scope.row.teamId)">删除</el-button>
+
+                </RentTable>
+            </el-tab-pane>
+            <el-tab-pane label="相机" name="相机">
+                <RentTable :columns="columns" :data="tableData" @search="searchCameraTable" @reset="resetCameraTable"
+                    @add="handleAddCamera" @edit="handleEditCamera" @delete="deleteCameraRow">
+
+                    <template #isAvailableSlot="{ scope }">
+                        <span :style="{ color: scope.row.isAvailable ? 'green' : 'red' }">
+                            {{ scope.row.isAvailable ? '可用' : '不可用' }}
+                        </span>
                     </template>
-                </el-table-column>
-            </el-table>
-        </div>
+                </RentTable>
+            </el-tab-pane>
+            <el-tab-pane label="其他设备" name="其他设备">
+                <RentTable :columns="columns" :data="tableData" @search="searchOtherTable" @reset="resetOtherTable"
+                    @add="handleAddOther" @edit="handleEditOther" @delete="deleteOtherRow">
+                    <template #isAvailableSlot="{ scope }">
+                        <span :style="{ color: scope.row.isAvailable ? 'green' : 'red' }">
+                            {{ scope.row.isAvailable ? '可用' : '不可用' }}
+                        </span>
+                    </template>
+                </RentTable>
+            </el-tab-pane>
+        </el-tabs>
+
+
+
+        <!-- 弹出表单对话框 -->
+        <el-dialog :visible.sync="dialogVisible" :title="dialogTitle">
+            <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
+                <el-form-item label="物品名称" prop="type">
+                    <el-input v-model="form.type"></el-input>
+                </el-form-item>
+                <el-form-item label="虚拟币价格" prop="coinConsumption">
+                    <el-input type="number" v-model="form.coinConsumption"></el-input>
+                </el-form-item>
+                <el-form-item label="是否可用" prop="isAvailable">
+                    <el-switch v-model="form.isAvailable"></el-switch>
+                </el-form-item>
+                <el-form-item label="租用队伍" prop="rentedTeamId">
+                    <el-input type="number" v-model="form.rentedTeamId"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="handleSubmit">确定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
 <script>
-import axios from 'axios';
+import RentTable from "@/components/RentTable.vue";
+import axios from "axios";
 
 export default {
+    components: { RentTable },
     data() {
         return {
-            searchQuery: null,
-            tableData: [
-                { type: '相机', coin_comspution: 50, tag: '相机' },
-                { type: '工位', coin_comspution: 20, tag: '工位' },
-                { type: '其余设备', coin_comspution: 30, tag: '其余设备' },
-                { type: '相机', coin_comspution: 70, tag: '相机' },
-                { type: '工位', coin_comspution: 40, tag: '工位' },
-                { type: '其余设备', coin_comspution: 25, tag: '其余设备' }
-            ]
-        }
+            activeTab: "工位", // 默认加载的 Tab
+            tableData: [], // 当前 Tab 的表格数据
+            dialogVisible: false,
+            dialogTitle: "",
+            form: {
+                id: null,
+                type: "",
+                coinConsumption: null,
+                isAvailable: true,
+                rentedTeamId: null,
+            },
+            rules: {
+                type: [{ required: true, message: "请输入物品名称", trigger: "blur" }],
+                coinConsumption: [{ required: true, message: "请输入价格", trigger: "blur" }],
+            },
+            columns: [
+                { prop: "id", label: "物品id", width: 150 },
+                { prop: "type", label: "物品名称", width: 150 },
+                { prop: "coinConsumption", label: "虚拟币价格", width: 100 },
+                { prop: "isAvailable", label: "是否可用", slot: "isAvailableSlot", width: 120 },
+                { prop: "rentedTeamId", label: "租用队伍", width: 200 },
+            ],
+        };
     },
     methods: {
-        reset() {
-            this.searchQuery = '';
-            this.clearFilter();
+        // 通用加载数据方法，根据 activeTab 加载对应数据
+        loadTableData() {
+            let endpoint = this.getEndpoint();
+            axios
+                .get(endpoint)
+                .then((response) => {
+                    console.log(response.data);
+                    this.tableData = response.data.data;
+                })
+                .catch((error) => {
+                    console.error(`加载${this.activeTab}数据失败：`, error);
+                    this.$message.error(`加载${this.activeTab}数据失败，请稍后重试`);
+                });
         },
-        clearFilter() {
-            this.$refs.filterTable.clearFilter();
+
+        // 根据 activeTab 获取 API 端点
+        getEndpoint() {
+            if (this.activeTab === "工位") return "http://localhost:8080/items/workstation/all";
+            if (this.activeTab === "相机") return "http://localhost:8080/items/camera/all";
+            if (this.activeTab === "其他设备") return "http://localhost:8080/items/equipment/all";
+            return "";
         },
-        filterTag(value, row) {
-            return row.tag === value;
+        // 搜索功能
+        searchStationTable(query) {
+            axios
+                .get("http://localhost:8080/items/workstation/findbyname", { params: { name: query } })
+                .then((response) => {
+                    this.tableData = response.data.data;
+                })
+                .catch((error) => {
+                    console.error("搜索工位数据失败：", error);
+                    this.$message.error("搜索工位数据失败，请稍后重试");
+                });
         },
-        filterHandler(value, row, column) {
-            const property = column['property'];
-            return row[property] === value;
-        }
-    }
-}
+        searchCameraTable(query) {
+            axios
+                .get("http://localhost:8080/items/camera/findbyname", { params: { name: query } })
+                .then((response) => {
+                    this.tableData = response.data;
+                })
+                .catch((error) => {
+                    console.error("搜索相机数据失败：", error);
+                    this.$message.error("搜索相机数据失败，请稍后重试");
+                });
+        },
+        searchOtherTable(query) {
+            axios
+                .get("http://localhost:8080/items/equipment/findbyname", { params: { name: query } })
+                .then((response) => {
+                    this.tableData = response.data;
+                })
+                .catch((error) => {
+                    console.error("搜索其他设备数据失败：", error);
+                    this.$message.error("搜索其他设备数据失败，请稍后重试");
+                });
+        },
+        // 重置功能
+        resetStationTable() {
+            this.loadTableData();
+        },
+        resetCameraTable() {
+            this.loadTableData();
+        },
+        resetOtherTable() {
+            this.loadTableData();
+        },
+        // 添加功能（可扩展）
+        // 新增工位
+        handleAddStation() {
+            this.dialogTitle = "新增工位";  // 设置对话框标题
+            this.form = { id: null, type: "", coinConsumption: null, isAvailable: true }; // 清空表单
+            this.dialogVisible = true;  // 显示弹框
+        },
+        // 新增相机
+        handleAddCamera() {
+            this.dialogTitle = "新增相机";  // 设置对话框标题
+            this.form = { id: null, type: "", coinConsumption: null, isAvailable: true }; // 清空表单
+            this.dialogVisible = true;  // 显示弹框
+        },
+        // 新增其他设备
+        handleAddOther() {
+            this.dialogTitle = "新增其他设备";  // 设置对话框标题
+            this.form = { id: null, type: "", coinConsumption: null, isAvailable: true }; // 清空表单
+            this.dialogVisible = true;  // 显示弹框
+        },
+        // 提交表单数据
+        handleSubmit() {
+            this.$refs.formRef.validate((valid) => {
+                if (!valid) return;
+                const { addEndpoint, editEndpoint } = this.getApiEndpoints();
+                const method = this.form.id ? "put" : "post";  // 如果有 ID 说明是编辑，反之为新增
+                const endpoint = this.form.id ? editEndpoint : addEndpoint;
+
+                const formData = {
+                    ...this.form,
+                    isAvailable: this.form.isAvailable ? 1 : 0
+                };
+                console.log("thisform:", formData);
+                axios[method](endpoint, formData)
+                    .then(() => {
+                        this.$message.success(`${this.dialogTitle}成功`);
+                        this.dialogVisible = false;
+                        this.loadTableData(); // 刷新数据
+                    })
+                    .catch((error) => {
+                        console.error(`${this.dialogTitle}失败：`, error);
+                        this.$message.error(`${this.dialogTitle}失败，请稍后重试`);
+                    });
+            });
+        },
+
+        // 获取不同 Tab 对应的 API 地址
+        getApiEndpoints() {
+            if (this.activeTab === "工位") {
+                return {
+                    addEndpoint: "http://localhost:8080/items/workstation/add",
+                    editEndpoint: `http://localhost:8080/items/workstation/update/${this.form.id}`,
+
+
+
+                };
+            }
+            if (this.activeTab === "相机") {
+                return {
+                    addEndpoint: "http://localhost:8080/items/camera/add",
+                    editEndpoint: `http://localhost:8080/items/camera/update/${this.form.id}`,
+                };
+            }
+            if (this.activeTab === "其他设备") {
+                return {
+                    addEndpoint: "http://localhost:8080/items/equipment/add",
+                    editEndpoint: `http://localhost:8080/items/workstation/update/${this.form.id}`
+
+                };
+            }
+            return {};
+        },
+
+
+        // 编辑功能
+        handleEditStation(row) {
+            this.dialogTitle = `编辑工位: ${row.type}`;  // 设置对话框标题
+            this.form = { ...row };  // 将表单数据填充为所选行数据
+            this.dialogVisible = true;  // 显示弹框
+        },
+        handleEditCamera(row) {
+            this.dialogTitle = `编辑相机: ${row.type}`;  // 设置对话框标题
+            this.form = { ...row };  // 将表单数据填充为所选行数据
+            this.dialogVisible = true;  // 显示弹框
+        },
+        handleEditOther(row) {
+            this.dialogTitle = `编辑设备: ${row.type}`;  // 设置对话框标题
+            this.form = { ...row };  // 将表单数据填充为所选行数据
+            this.dialogVisible = true;  // 显示弹框
+        },
+        // 删除功能
+        deleteStationRow(row) {
+            this.confirmDelete(`http://localhost:8080/items/workstation/delete/${row.id}`, "工位", row);
+        },
+        deleteCameraRow(row) {
+            this.confirmDelete(`http://localhost:8080/items/camera/delete/${row.id}`, "相机", row);
+        },
+        deleteOtherRow(row) {
+            this.confirmDelete(`http://localhost:8080/items/equipment/delete/${row.id}`, "其他设备", row);
+        },
+        confirmDelete(endpoint, label, row) {
+            this.$confirm(
+                `确定删除${label} ${row.type} 吗？`,
+                "提示",
+                {
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    type: "warning",
+                }
+            )
+                .then(() => axios.delete(endpoint))
+                .then(() => {
+                    this.$message.success("删除成功");
+                    this.loadTableData();
+                })
+                .catch((error) => {
+                    if (error !== "cancel") {
+                        console.error(`删除${label}失败：`, error);
+                        this.$message.error(`删除${label}失败，请稍后重试`);
+                    }
+                });
+        },
+    },
+    watch: {
+        // Tab 切换时加载对应数据
+        activeTab() {
+            this.loadTableData();
+        },
+    },
+    mounted() {
+        this.loadTableData(); // 默认加载工位数据
+    },
+};
 </script>
 
 <style scoped>
-.container {
-    padding: 20px;
-    background-color: #f9f9f9;
-}
-
-.header {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.header .el-input {
-    max-width: 300px;
-}
-
-.table-wrapper {
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-}
+/* 根据需要添加样式 */
 </style>

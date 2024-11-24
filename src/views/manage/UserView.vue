@@ -11,9 +11,13 @@
                 <el-table-column prop="userId" label="用户ID" sortable></el-table-column>
                 <el-table-column prop="username" label="用户名"></el-table-column>
                 <el-table-column prop="password" label="用户密码"></el-table-column>
-                <el-table-column prop="role" label="用户身份"></el-table-column>
+                <el-table-column prop="role" label="用户身份">
+                    <template slot-scope="scope">
+                        <span>{{ getRoleLabel(scope.row.role) }}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="teamId" label="用户所属团队Id"></el-table-column>
-                <el-table-column prop="teamName" label="用户所属团队名称"></el-table-column>
+                <!-- <el-table-column prop="teamName" label="用户所属团队名称"></el-table-column> -->
                 <el-table-column label="操作">
                     <template v-slot="scope">
                         <el-button size="mini" type="primary" plain @click="handleEdit(scope.row)">编辑</el-button>
@@ -33,16 +37,16 @@
                 </el-form-item>
                 <el-form-item label="用户角色">
                     <el-select v-model="newUser.role" placeholder="请选择角色" style="width: 100%;">
-                        <el-option label="队长" value="admin"></el-option>
-                        <el-option label="队员" value="user"></el-option>
+                        <el-option label="队长" value="leader"></el-option>
+                        <el-option label="队员" value="member"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="团队ID">
                     <el-input v-model="newUser.teamId" type="number" placeholder="请输入团队ID"></el-input>
                 </el-form-item>
-                <el-form-item label="团队名称">
+                <!-- <el-form-item label="团队名称">
                     <el-input v-model="newUser.teamName" placeholder="请输入团队名称"></el-input>
-                </el-form-item>
+                </el-form-item> -->
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogVisible = false">取消</el-button>
@@ -71,7 +75,6 @@ export default {
                 password: null,
                 role: null,
                 teamId: null,
-                teamName: null,
 
             },
             editMode: false,
@@ -81,6 +84,14 @@ export default {
         this.load(); // 页面加载时获取数据
     },
     methods: {
+
+        getRoleLabel(role) {
+            switch (role) {
+                case "leader": return "队长";
+                case "member": return "队员";
+            }
+        },
+
         handleDialogClose() {
             this.dialogVisible = false;
         },
@@ -123,7 +134,7 @@ export default {
                 // 成功获取数据后，更新表格数据
                 if (response.status === 200 && response.data) {
                     console.log(response.data);
-                    this.teams = [response.data];  // 假设返回的是一个团队对象
+                    this.users = [response.data.data];  // 假设返回的是一个团队对象
                 } else if (!response.data) {
                     this.$message.error("没有这位用户");
                 }
@@ -141,18 +152,19 @@ export default {
         handleAdd() {
             // 处理新增操作
             console.log("新增用户");
-            this.newTeam = {
+            this.newUser = {
+                userId: null,
+                username: "",
+                password: null,
+                role: null,
                 teamId: null,
-                teamName: "",
-                virtualCoins: 0,
-                creationDate: null,
             };
             this.editMode = false;  // 设置为新增模式
             this.dialogVisible = true; // 显示对话框
         },
-        async del(teamId) {
+        async del(userId) {
             try {
-                console.log(teamId);
+                console.log(userId);
                 await axios.delete(`http://localhost:8080/user/admindelete/${userId}`);
 
                 this.load(); // 删除后重新加载数据
@@ -162,7 +174,7 @@ export default {
         },
         handleEdit(row) {
             console.log(row);
-            this.newTeam = { ...row }
+            this.newUser = { ...row }
             this.editMode = true;
             this.dialogVisible = true; // 显示对话框
         },
@@ -173,10 +185,12 @@ export default {
             try {
                 if (this.editMode) {
                     console.log("---------:", this.editMode)
-                    await axios.put(`http://localhost:8080/user/adminupdate/`, this.newUser);
+                    console.log("新用户:", this.newUser)
+                    await axios.put(`http://localhost:8080/user/adminupdate//${this.newUser.userId}`, this.newUser);
                     this.$message.success("更新成功");
                 } else {
                     console.log("---------: 新增", this.editMode)
+                    console.log("新用户:", this.newUser)
                     await axios.post('http://localhost:8080/user/admincreate', this.newUser);
                     this.$message.success("新增成功");
                 }
