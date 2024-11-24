@@ -74,7 +74,7 @@ export default {
                         name: "人数",
                         type: "bar",
                         data: personNums, // 使用人数数据
-                        itemStyle: { color: "#409EFF" }
+                        itemStyle: { color: "#c23531" }
                     }
                 ]
             };

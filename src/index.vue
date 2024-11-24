@@ -51,11 +51,11 @@
           </el-submenu>
           <el-menu-item index="/review">
             <i class="el-icon-document"></i>
-            <span>活动审核管理</span>
+            <span>材料审核管理</span>
           </el-menu-item>
           <el-menu-item index="/crypto">
             <i class="el-icon-coin"></i>
-            <span>虚拟币信息管理</span>
+            <span>可视化信息管理</span>
           </el-menu-item>
 
 

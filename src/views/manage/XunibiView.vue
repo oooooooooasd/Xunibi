@@ -19,20 +19,18 @@
                         <div class="title">今日签到人数</div>
                         <div class="value">
                             <i class="el-icon-s-flag" style="color: red"></i>
-                            {{ value1.toLocaleString(undefined, { minimumFractionDigits: 2 }) }}
+                            {{ value1 }}
                             <i class="el-icon-s-flag" style="color: blue"></i>
                         </div>
                     </div>
                 </el-col>
                 <el-col :span="6">
                     <div class="statistic-box">
-                        <div class="title">Feedback</div>
+                        <div class="title">今日值日</div>
                         <div class="value">
-                            {{ like ? 521 : 520 }}
-                            <span @click="like = !like" class="like">
-                                <i class="el-icon-star-on" style="color:red" v-show="like"></i>
-                                <i class="el-icon-star-off" v-show="!like"></i>
-                            </span>
+                            <i class="el-icon-s-flag" style="color: red"></i>
+                            {{ value3 }} 团队
+                            <i class="el-icon-s-flag" style="color: blue"></i>
                         </div>
                     </div>
                 </el-col>
@@ -43,12 +41,15 @@
 
 
 
-            <el-tabs type="border-card" style="width: 100%;" @tab-click="handleTabClick">
-                <el-tab-pane label="支出数据" :lazy="true">
-                    <IncomeComponent :chartData="charExpData"></IncomeComponent>
+            <el-tabs type="border-card">
+                <el-tab-pane label="首页" lazy>
+
                 </el-tab-pane>
-                <el-tab-pane label="收入数据" :lazy="true">
+                <el-tab-pane label="收入数据" lazy>
                     <IncomeComponent :chartData="charData"></IncomeComponent>
+                </el-tab-pane>
+                <el-tab-pane label="支出数据" lazy>
+                    <ExpandComponent :chartData="charExpData"></ExpandComponent>
                 </el-tab-pane>
                 <el-tab-pane label="团队数据">
                     <el-row :gutter="15">
@@ -78,6 +79,7 @@ import axios from "axios";
 import IncomeComponent from "@/components/IncomeComponent.vue";
 import TeamChartsConponent from "@/components/TeamChartsConponent.vue";
 import TeamNumsComponent from "@/components/TeamNumsComponent.vue";
+import ExpandComponent from "@/components/ExpandComponent.vue";
 import * as echarts from "echarts";
 
 
@@ -85,7 +87,8 @@ export default {
     components: {
         IncomeComponent,
         TeamChartsConponent,
-        TeamNumsComponent
+        TeamNumsComponent,
+        ExpandComponent
     },
     data() {
 
@@ -93,13 +96,11 @@ export default {
             like: true,
             value1: 4154.564,
             value2: 1314,
+            value3: "test",
             title: "增长人数",
             charData: [
-
             ],
             charExpData: [
-
-
             ],
 
             teamData: [
@@ -114,12 +115,7 @@ export default {
 
 
     created() {
-        // // 获取团队总数
-        // this.getTeamNums();
-        // this.getTeamWithMembers();
-        // this.getMemberNums();
-        // this.getTeamAchievementSummaries();
-        // this.getMonthlySpend()
+
     },
     mounted() {
         this.getTeamAchievementSummaries();
@@ -128,13 +124,6 @@ export default {
         this.getMemberNums();
         this.getMonthlySpend();
         this.getMonthlyEarn();
-
-
-        setTimeout(() => {
-            if (this.$refs.IncomeChart) {
-                this.$refs.IncomeChart.resize();
-            }
-        }, 1000);
     },
     methods: {
 
@@ -142,6 +131,7 @@ export default {
 
             this.$nextTick(() => {
                 this.$refs.IncomeChart && this.$refs.IncomeChart.resize();
+                this.$refs.ExpandChart && this.$refs.ExpandChart.resize();
             });
         },
         getTeamNums() {
@@ -205,7 +195,7 @@ export default {
                 .then((response) => {
                     if (response.data.code === 200) {
                         const rawData = response.data.data;
-                        console.log("转化前:", rawData);
+                        console.log("支出转化前:", rawData);
 
                         // 获取当前年份和月份
                         const currentYear = new Date().getFullYear();
@@ -228,7 +218,7 @@ export default {
                             })
                         ];
 
-                        console.log("转化后:", dataset);
+                        console.log("支出转化后:", dataset);
 
                         // 设置图表的最终数据格式
                         this.charExpData = dataset;
@@ -245,7 +235,7 @@ export default {
                 .then((response) => {
                     if (response.data.code === 200) {
                         const rawData = response.data.data;
-                        console.log("转化前:", rawData);
+                        console.log("收入转化前:", rawData);
 
                         // 获取当前年份和月份
                         const currentYear = new Date().getFullYear();
@@ -276,7 +266,7 @@ export default {
                     }
                 })
                 .catch((error) => {
-                    console.error("获取每月支出数据失败", error);
+                    console.error("获取每月收入数据失败", error);
                 });
         }
 

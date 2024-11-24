@@ -97,13 +97,73 @@ export default {
                         name: "贡献度",
                         type: "bar",
                         data: computedData.map((item) => item.contribution),
-                        itemStyle: { color: "#409EFF" }
+                        itemStyle: { color: "#3e3e3e" }
                     }
                 ]
             };
 
             this.TeamChart.setOption(option);
         }
+        //         updateChart() {
+        //     if (!this.teamData.length) return;  // Ensure data is not empty
+        //     const computedData = this.teamData.map((team) => {
+        //         const contribution =
+        //             team.paper * this.weights.w1 +
+        //             team.competition * this.weights.w2 +
+        //             team.training * this.weights.w3;
+        //         return { name: team.name, contribution };
+        //     });
+
+        //     // Find the maximum and minimum contribution values to scale the color
+        //     const maxContribution = Math.max(...computedData.map(item => item.contribution));
+        //     const minContribution = Math.min(...computedData.map(item => item.contribution));
+
+        //     // Function to generate gradient color based on contribution value
+        //     const getGradientColor = (contribution) => {
+        //         const scale = (contribution - minContribution) / (maxContribution - minContribution); // Scale from 0 to 1
+        //         // Define the base colors for gradient (darker blue for high, light blue for low)
+        //         const colorStart = [0, 255, 255];  // Start color: light blue (higher contribution)
+        //         const colorEnd = [0, 128, 255];    // End color: dark blue (lower contribution)
+        //         const interpolatedColor = colorStart.map((start, index) => {
+        //             return Math.floor(start + (colorEnd[index] - start) * scale);
+        //         });
+        //         return `rgb(${interpolatedColor.join(',')})`;  // Return RGB color string
+        //     };
+
+        //     const option = {
+        //         title: {
+        //             text: "团队贡献度柱状图"
+        //         },
+        //         tooltip: {
+        //             trigger: "axis",
+        //             axisPointer: { type: "shadow" }
+        //         },
+        //         xAxis: {
+        //             type: "category",
+        //             data: computedData.map((item) => item.name)
+        //         },
+        //         yAxis: {
+        //             type: "value"
+        //         },
+        //         series: [
+        //             {
+        //                 name: "贡献度",
+        //                 type: "bar",
+        //                 data: computedData.map((item) => item.contribution),
+        //                 itemStyle: {
+        //                     // Set dynamic gradient color for each bar
+        //                     color: (params) => {
+        //                         return getGradientColor(params.data);
+        //                     }
+        //                 }
+        //             }
+        //         ]
+        //     };
+
+        //     this.TeamChart.setOption(option);
+        // }
+
+
     }
 };
 </script>

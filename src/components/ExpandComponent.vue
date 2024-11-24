@@ -1,5 +1,5 @@
 <template>
-    <div ref="IncomeChart" style="width: 100%;height: 600px;"></div>
+    <div ref="ExpandChart" style="width: 100%;height: 600px;"></div>
 </template>
 
 <script>
@@ -14,7 +14,7 @@ export default {
     },
     data() {
         return {
-            IncomeChart: null,
+            ExpandChart: null,
         };
     },
     mounted() {
@@ -40,13 +40,13 @@ export default {
     },
     methods: {
         resizeChart() {
-            if (this.IncomeChart) {
-                this.IncomeChart.resize(); // 调整图表尺寸
+            if (this.ExpandChart) {
+                this.ExpandChart.resize(); // 调整图表尺寸
             }
         },
         initChart() {
-            const chartDom = this.$refs.IncomeChart;
-            this.IncomeChart = echarts.init(chartDom);
+            const chartDom = this.$refs.ExpandChart;
+            this.ExpandChart = echarts.init(chartDom);
             const series = this.chartData.slice(1).map((row) => ({
                 name: row[0],  // 系列名称，使用每行的第一个元素作为名称
                 type: "line",
@@ -84,13 +84,13 @@ export default {
                 series
             };
 
-            this.IncomeChart.setOption(option);
+            this.ExpandChart.setOption(option);
 
-            this.IncomeChart.on("updateAxisPointer", (event) => {
+            this.ExpandChart.on("updateAxisPointer", (event) => {
                 const xAxisInfo = event.axesInfo[0];
                 if (xAxisInfo) {
                     const dimension = xAxisInfo.value + 1;
-                    this.IncomeChart.setOption({
+                    this.ExpandChart.setOption({
                         series: {
                             id: "pie",
                             label: { formatter: "{b}: {@[" + dimension + "]} ({d}%)" },
@@ -101,7 +101,7 @@ export default {
             });
         },
         updateChart(newValue) {
-            if (this.IncomeChart) {
+            if (this.ExpandChart) {
                 const series = newValue.slice(1).map((row) => ({
                     name: row[0],  // 系列名称，使用每行的第一个元素作为名称
                     type: "line",
@@ -119,14 +119,9 @@ export default {
                     emphasis: { focus: "self" },
                     label: { formatter: "{b}: {@currentMonth} ({d}%)" },
                     encode: { itemName: "product", value: "currentMonth", tooltip: "currentMonth" },
-                    itemStyle: {
-                        // 给每个扇形增加边框，形成间隔
-                        borderWidth: 5,
-                        borderColor: "#fff"  // 设置边框颜色为白色，形成间隔
-                    }
                 });
 
-                this.IncomeChart.setOption({
+                this.ExpandChart.setOption({
                     dataset: {
                         source: newValue,
                     },
