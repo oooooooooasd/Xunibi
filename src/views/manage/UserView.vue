@@ -165,8 +165,12 @@ export default {
         async del(userId) {
             try {
                 console.log(userId);
-                await axios.delete(`http://localhost:8080/user/admindelete/${userId}`);
-
+                const response = await axios.delete(`http://localhost:8080/user/admindelete/${userId}`);
+                if (response.status === 200) {
+                    this.$message.success(response.data.msg);
+                } else {
+                    this.$message.error(response.data.msg);
+                }
                 this.load(); // 删除后重新加载数据
             } catch (error) {
                 console.error("删除失败:", error);
@@ -186,7 +190,7 @@ export default {
                 if (this.editMode) {
                     console.log("---------:", this.editMode)
                     console.log("新用户:", this.newUser)
-                    await axios.put(`http://localhost:8080/user/adminupdate//${this.newUser.userId}`, this.newUser);
+                    await axios.put(`http://localhost:8080/user/adminupdate/${this.newUser.userId}`, this.newUser);
                     this.$message.success("更新成功");
                 } else {
                     console.log("---------: 新增", this.editMode)

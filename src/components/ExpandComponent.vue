@@ -59,11 +59,15 @@ export default {
             series.push({
                 type: "pie",
                 id: "pie",
-                radius: "30%",
+                radius: ["10", "30%"],
                 center: ["50%", "25%"],
                 emphasis: { focus: "self" },
                 label: { formatter: "{b}: {@currentMonth} ({d}%)" },
                 encode: { itemName: "product", value: "currentMonth", tooltip: "currentMonth" },
+                itemStyle: {
+                    borderWidth: 5,  // Add a border width to create the gap
+                    borderColor: "#fff"  // White border to create a clear separation between slices
+                }
             });
 
             const option = {
@@ -114,11 +118,15 @@ export default {
                 series.push({
                     type: "pie",
                     id: "pie",
-                    radius: "30%",
+                    radius: ["15%", "30%"],
                     center: ["50%", "25%"],
                     emphasis: { focus: "self" },
                     label: { formatter: "{b}: {@currentMonth} ({d}%)" },
                     encode: { itemName: "product", value: "currentMonth", tooltip: "currentMonth" },
+                    itemStyle: {
+                        borderWidth: 5,  // Add a border width to create the gap
+                        borderColor: "#fff"  // White border to create a clear separation between slices
+                    }
                 });
 
                 this.ExpandChart.setOption({

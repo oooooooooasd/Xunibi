@@ -20,7 +20,7 @@
                         <div class="value">
                             <i class="el-icon-s-flag" style="color: red"></i>
                             {{ value1 }}
-                            <i class="el-icon-s-flag" style="color: blue"></i>
+
                         </div>
                     </div>
                 </el-col>
@@ -28,9 +28,9 @@
                     <div class="statistic-box">
                         <div class="title">今日值日</div>
                         <div class="value">
-                            <i class="el-icon-s-flag" style="color: red"></i>
-                            {{ value3 }} 团队
                             <i class="el-icon-s-flag" style="color: blue"></i>
+                            {{ value3 }} 团队
+
                         </div>
                     </div>
                 </el-col>

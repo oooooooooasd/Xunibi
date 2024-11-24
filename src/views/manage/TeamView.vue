@@ -149,8 +149,14 @@ export default {
         async del(teamId) {
             try {
                 console.log(teamId);
-                await axios.delete(`http://localhost:8080/team/delete/${teamId}`);
+                const response = await axios.delete(`http://localhost:8080/team/delete/${teamId}`);
+                console.log("删除信息:", response);
+                if (response.data.code === 200) {
+                    this.$message.success(response.data.msg);
+                } else {
+                    this.$message.error(response.data.msg);
 
+                }
                 this.load(); // 删除后重新加载数据
             } catch (error) {
                 console.error("删除失败:", error);

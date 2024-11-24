@@ -1,5 +1,5 @@
 <template>
-    <div ref="IncomeChart" style="width: 100%;height: 600px;"></div>
+    <div ref="IncomeChart" style="width: 100%; height: 600px;"></div>
 </template>
 
 <script>
@@ -18,14 +18,10 @@ export default {
         };
     },
     mounted() {
-        // // window.onload = () => {
-        // //     this.initChart(); // 在窗口完全加载后初始化图表
-        // // };
         this.$nextTick(() => {
             this.initChart(); // 等待 DOM 渲染完成后初始化图表
         });
         window.addEventListener("resize", this.resizeChart); // 窗口大小变化时调整图表尺寸
-
     },
     beforeDestroy() {
         window.removeEventListener("resize", this.resizeChart); // 防止内存泄漏
@@ -59,11 +55,15 @@ export default {
             series.push({
                 type: "pie",
                 id: "pie",
-                radius: "30%",
+                radius: ['10%', '30%'],
                 center: ["50%", "25%"],
                 emphasis: { focus: "self" },
                 label: { formatter: "{b}: {@currentMonth} ({d}%)" },
                 encode: { itemName: "product", value: "currentMonth", tooltip: "currentMonth" },
+                itemStyle: {
+                    borderWidth: 5,  // Add a border width to create the gap
+                    borderColor: "#fff"  // White border to create a clear separation between slices
+                }
             });
 
             const option = {
@@ -114,15 +114,14 @@ export default {
                 series.push({
                     type: "pie",
                     id: "pie",
-                    radius: "30%",
+                    radius: ['10%', '30%'],
                     center: ["50%", "25%"],
                     emphasis: { focus: "self" },
                     label: { formatter: "{b}: {@currentMonth} ({d}%)" },
                     encode: { itemName: "product", value: "currentMonth", tooltip: "currentMonth" },
                     itemStyle: {
-                        // 给每个扇形增加边框，形成间隔
-                        borderWidth: 5,
-                        borderColor: "#fff"  // 设置边框颜色为白色，形成间隔
+                        borderWidth: 5,  // Add border width for the gap
+                        borderColor: "#fff"  // White border for the gap effect
                     }
                 });
 
@@ -136,7 +135,6 @@ export default {
                     series,
                 });
             }
-
         },
     },
 };
