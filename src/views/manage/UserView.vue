@@ -17,7 +17,7 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="teamId" label="用户所属团队Id"></el-table-column>
-                <!-- <el-table-column prop="teamName" label="用户所属团队名称"></el-table-column> -->
+                <el-table-column prop="teamName" label="用户所属团队名称"></el-table-column>
                 <el-table-column label="操作">
                     <template v-slot="scope">
                         <el-button size="mini" type="primary" plain @click="handleEdit(scope.row)">编辑</el-button>
@@ -95,29 +95,54 @@ export default {
         handleDialogClose() {
             this.dialogVisible = false;
         },
+
         async load() {
             try {
-                const response = await axios.get('http://localhost:8080/user/all');
-                if (response.status === 200 && response.data) {
-                    console.log("用户数据:", response.data.data);
-                    this.users = response.data.data; // 假设返回的数据包含团队列表
-                    console.log("用户列表数据teams:", this.users);
+                // 并行请求用户数据和团队数据
+                const [userResponse, teamResponse] = await Promise.all([
+                    axios.get('http://localhost:8080/user/all'),
+                    axios.get('http://localhost:8080/team/list'),
+                ]);
+
+                // 校验响应是否成功
+                if (userResponse.status === 200 && teamResponse.status === 200) {
+                    const users = userResponse.data.data; // 假设用户数据在 data.data
+                    const teams = teamResponse.data; // 假设团队数据在 data.data
+
+                    console.log("用户数据:", users);
+                    console.log("团队数据:", teams);
+
+                    // 用团队数据创建一个映射表（teamId -> teamName）
+                    const teamMap = {};
+                    teams.forEach((team) => {
+                        teamMap[team.teamId] = team.teamName;
+                    });
+
+                    // 为每个用户添加对应的团队名称
+                    const enrichedUsers = users.map((user) => {
+                        return {
+                            ...user,
+                            teamName: teamMap[user.teamId] || "未分配团队", // 如果没有匹配团队，显示“未分配团队”
+                        };
+                    });
+
+                    // 更新表格数据
+                    this.users = enrichedUsers;
                 } else {
-                    console.error("服务器返回了不符合预期的响应", response);
+                    console.error("服务器返回了不符合预期的响应", userResponse, teamResponse);
                 }
             } catch (error) {
+                // 错误处理
                 if (error.response) {
-                    // 服务器响应了错误状态码
                     console.error("服务器错误:", error.response.data);
                 } else if (error.request) {
-                    // 请求没有收到响应
                     console.error("没有收到响应:", error.request);
                 } else {
-                    // 其他类型的错误（如请求配置错误）
                     console.error("请求错误:", error.message);
                 }
             }
         }
+
         ,
         async search() {
 
