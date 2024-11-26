@@ -49,7 +49,7 @@
                     <el-input type="number" v-model="form.coinConsumption"></el-input>
                 </el-form-item>
                 <el-form-item label="是否可用" prop="isAvailable">
-                    <el-switch v-model="form.isAvailable"></el-switch>
+                    <el-switch v-model="isAvailableBoolean"></el-switch>
                 </el-form-item>
                 <el-form-item label="租用队伍" prop="rentedTeamId">
                     <el-input type="number" v-model="form.rentedTeamId"></el-input>
@@ -79,7 +79,7 @@ export default {
                 id: null,
                 type: "",
                 coinConsumption: null,
-                isAvailable: true,
+                isAvailable: 1,
                 rentedTeamId: null,
             },
             rules: {
@@ -94,6 +94,17 @@ export default {
                 { prop: "rentedTeamId", label: "租用队伍", width: 200 },
             ],
         };
+    },
+    computed: {
+        // 将 isAvailable 转换为布尔值
+        isAvailableBoolean: {
+            get() {
+                return this.form.isAvailable === 1;
+            },
+            set(value) {
+                this.form.isAvailable = value ? 1 : 0;
+            }
+        }
     },
     methods: {
         // 通用加载数据方法，根据 activeTab 加载对应数据
@@ -293,6 +304,7 @@ export default {
     mounted() {
         this.loadTableData(); // 默认加载工位数据
     },
+
 };
 </script>
 

@@ -43,8 +43,28 @@
 
             <el-tabs type="border-card">
                 <el-tab-pane label="首页" lazy>
+                    <div style="padding: 20px; font-size: 16px; line-height: 1.8; color: #555;">
+                        <p>
+                            数据可视化说明。
+                        </p>
+                        <ul style="list-style: disc; margin-left: 20px;">
+                            <li>
+                                <strong>团队贡献度可视化：</strong> 展示每个团队在科研成果（如论文、竞赛）和培训活动中的表现。通过条形图比较各团队的具体贡献。可以自行分配权重
+                            </li>
+                            <li>
+                                <strong>团队人数分布：</strong> 用图表直观展示每个团队的成员人数，让您快速掌握团队规模分布情况。
+                            </li>
+                            <li>
+                                <strong>收入数据：</strong> 以图表形式展示年度内各类别的收入变化趋势，帮助分析众创空间中各团队的虚拟币来源，观察团队主要通过哪方面的活动获取虚拟币。
+                            </li>
+                            <li>
+                                <strong>支出数据：</strong> 通过可视化数据呈现，分析各类支出的时间分布和总量，观察众创空间各团队的虚拟币支出热点。
+                            </li>
+                        </ul>
 
+                    </div>
                 </el-tab-pane>
+
                 <el-tab-pane label="收入数据" lazy>
                     <IncomeComponent :chartData="charData"></IncomeComponent>
                 </el-tab-pane>

@@ -1,23 +1,64 @@
+<style scoped>
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f5f7fa;
+}
+
+.login-container {
+    width: 400px;
+}
+
+.login-card {
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.card-header {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.login-form {
+    margin-top: 20px;
+}
+
+.register-link {
+    color: #409eff;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.register-link:hover {
+    color: #66b1ff;
+}
+</style>
+
 <template>
     <div class="login-body">
         <div class="login-container">
-            <el-card class="login-card">
+            <el-card class="login-card" shadow="hover">
                 <template #header>
                     <div class="card-header">管理员登录</div>
                 </template>
                 <div class="login-form">
-                    <el-form v-model="loginForm" label-width="100px">
+                    <!-- 确保 el-form 的 model 正确绑定 -->
+                    <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" label-width="100px">
                         <el-form-item label="账号：" prop="username">
-                            <el-input type="text" v-model="loginForm.username" placeholder="请输入账号" />
+                            <el-input type="text" v-model="loginForm.username" placeholder="请输入账号" clearable />
                         </el-form-item>
                         <el-form-item label="密码：" prop="password">
-                            <el-input type="password" v-model="loginForm.password" placeholder="请输入密码" />
+                            <el-input type="password" v-model="loginForm.password" placeholder="请输入密码" show-password />
                         </el-form-item>
-
-                        <el-button class="login-btn" type="primary" @click="Login">登录</el-button>
-                        <div class="register-link">
-                            <a @click="toRegister">还没有账号? 点击注册</a>
-                        </div>
+                        <el-form-item>
+                            <el-button type="primary" :loading="loading" @click="handleLogin">
+                                登录
+                            </el-button>
+                        </el-form-item>
                     </el-form>
                 </div>
             </el-card>
@@ -26,115 +67,57 @@
 </template>
 
 <script>
-import axios from 'axios';
+import { Message } from "element-ui";
 
 export default {
-    name: 'LoginView',
+    name: "LoginView",
     data() {
         return {
+            // 表单数据
             loginForm: {
-                username: '',
-                password: '',
-                code: ''
-            }
+                username: "",
+                password: "",
+            },
+            // 表单验证规则
+            loginRules: {
+                username: [
+                    { required: true, message: "请输入账号", trigger: "blur" },
+                ],
+                password: [
+                    { required: true, message: "请输入密码", trigger: "blur" },
+                ],
+            },
+            loading: false, // 登录加载状态
+            // 模拟用户数据
+            fakeUserData: {
+                username: "admin",
+                password: "123456",
+            },
         };
     },
     methods: {
-        toRegister() {
-            this.$router.push({ path: '/toRegister' });
+        handleLogin() {
+            this.$refs.loginFormRef.validate((valid) => {
+                if (!valid) {
+                    return Message.error("请输入账号和密码！");
+                }
+
+                this.loading = true;
+
+                setTimeout(() => {
+                    if (
+                        this.loginForm.username === this.fakeUserData.username &&
+                        this.loginForm.password === this.fakeUserData.password
+                    ) {
+                        Message.success("登录成功！");
+                        this.$router.push({ path: "/" });
+                    } else {
+                        Message.error("用户名或密码错误，请重试！");
+                    }
+                    this.loading = false;
+                }, 1000);
+            });
         },
-        async Login() {
-            try {
-                const response = await axios.post('http://localhost:8080/login', {
-                    username: this.loginForm.username,
-                    password: this.loginForm.password
-                });
-                console.log('Login successful:', response.data);
-                // Redirect to home page after successful login
-                this.$router.push({ path: '/' });
-            } catch (error) {
-                console.error('Login Failed:', error.response ? error.response.data : error.message);
-            }
-        }
-    }
+    },
 };
 </script>
-
-<style lang="less" scoped>
-/* General Styling */
-.login-body {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f4f7fc;
-}
-
-.login-container {
-    width: 100%;
-    max-width: 400px;
-    padding: 30px;
-}
-
-.logo {
-    text-align: center;
-    font-size: 32px;
-    font-weight: bold;
-    color: #4a90e2;
-    margin-bottom: 20px;
-}
-
-.login-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-    font-size: 18px;
-    text-align: center;
-    font-weight: bold;
-    color: #333;
-    padding: 10px 0;
-}
-
-.login-form {
-    padding: 20px;
-}
-
-.el-form-item {
-    margin-bottom: 20px;
-}
-
-.el-input {
-    font-size: 14px;
-    padding: 10px;
-    border-radius: 6px;
-}
-
-.el-button {
-    font-size: 14px;
-    padding: 10px;
-    border-radius: 6px;
-    width: 100%;
-    height: 40px;
-}
-
-.login-btn {
-    margin-top: 10px;
-}
-
-.register-link {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.register-link a {
-    color: #4a90e2;
-    font-size: 14px;
-    text-decoration: none;
-}
-
-.register-link a:hover {
-    text-decoration: underline;
-}
-</style>
