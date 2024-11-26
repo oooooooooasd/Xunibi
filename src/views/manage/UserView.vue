@@ -41,19 +41,18 @@
                         <el-option label="队员" value="member"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="团队ID">
-                    <el-input v-model="newUser.teamId" type="number" placeholder="请输入团队ID"></el-input>
+                <el-form-item label="所属团队">
+                    <el-select v-model="newUser.teamId" placeholder="请选择团队" style="width: 100%;">
+                        <el-option v-for="team in teamList" :key="team.teamId" :label="team.teamName"
+                            :value="team.teamId"></el-option>
+                    </el-select>
                 </el-form-item>
-                <!-- <el-form-item label="团队名称">
-                    <el-input v-model="newUser.teamName" placeholder="请输入团队名称"></el-input>
-                </el-form-item> -->
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogVisible = false">取消</el-button>
                 <el-button type="primary" @click="saveTeam">保存</el-button>
             </div>
         </el-dialog>
-
     </div>
 </template>
 
@@ -66,7 +65,8 @@ export default {
             searchQuery: null, // 搜索关键词
             users: [
 
-            ], // 团队数据列表
+            ],
+            teamList: [], // 存储团队数据列表
             selectedTeamId: null, // 选中的团队数据
             dialogVisible: false,
             newUser: {
@@ -108,9 +108,9 @@ export default {
                 if (userResponse.status === 200 && teamResponse.status === 200) {
                     const users = userResponse.data.data; // 假设用户数据在 data.data
                     const teams = teamResponse.data; // 假设团队数据在 data.data
-
-                    console.log("用户数据:", users);
-                    console.log("团队数据:", teams);
+                    this.teamList = teams; // 存储团队数据
+                    // console.log("用户数据:", users);
+                    // console.log("团队数据:", teams);
 
                     // 用团队数据创建一个映射表（teamId -> teamName）
                     const teamMap = {};
@@ -189,7 +189,7 @@ export default {
         },
         async del(userId) {
             try {
-                console.log(userId);
+                // console.log(userId);
                 const response = await axios.delete(`http://localhost:8080/user/admindelete/${userId}`);
                 if (response.status === 200) {
                     this.$message.success(response.data.msg);
