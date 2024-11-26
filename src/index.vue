@@ -34,6 +34,10 @@
               <i class="el-icon-s-cooperation"></i>
               <span>团队信息管理</span>
             </el-menu-item>
+            <el-menu-item index="/admin">
+              <i class="el-icon-s-cooperation"></i>
+              <span>管理员信息管理</span>
+            </el-menu-item>
           </el-submenu>
           <el-submenu index="2">
             <template slot="title">
@@ -42,7 +46,7 @@
             </template>
             <el-menu-item index="/rent">
               <i class="el-icon-s-marketing"></i>
-              <span>物品价格管理</span>
+              <span>物品租用管理</span>
             </el-menu-item>
             <!-- <el-menu-item index="/return">
               <i class="el-icon-document"></i>

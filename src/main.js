@@ -5,16 +5,31 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css'
 import axios from 'axios'
 
-// axios.interceptors.request.user(
-//   // axios 提供拦截
-//   config => {
-//     if (localStorage.getItem('token')) {
-//       console.log('config')
-//       config.headers.Authorization = window.sessionStorage.getItem('token')
-//     }
-//     return config
-//   }
-// )
+
+axios.defaults.baseURL = "http://localhost:8080"; // 配置后端接口的基础 URL
+axios.defaults.withCredentials = true; // 如果有跨域和登录需要
+
+// 请求拦截器
+axios.interceptors.request.use((config) => {
+  const adminData = JSON.parse(localStorage.getItem("adminData"));
+  if (adminData) {
+    config.headers.Authorization = `Bearer ${adminData.token || ""}`;
+  }
+  return config;
+});
+
+
+// 响应拦截器
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("adminData");
+      router.push("/login");
+    }
+    return Promise.reject(error);
+  }
+);
 
 Vue.config.productionTip = false
 Vue.use(ElementUI);

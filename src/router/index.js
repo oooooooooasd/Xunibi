@@ -22,9 +22,16 @@ const routes = [
       { path: 'rent', name: "RentView", component: () => import('../views/manage/RentView.vue') },
       { path: 'return', name: "ReturnView", component: () => import('../views/manage/ReturnView.vue') },
       { path: 'team', name: "TeamView", component: () => import("../views/manage/TeamView.vue") },
-      { path: 'review', name: "ReviewView", component: () => import("../views/manage/MaterialReviewView.vue") }
-    ]
+      { path: 'review', name: "ReviewView", component: () => import("../views/manage/MaterialReviewView.vue") },
+      { path: 'admin', name: "AdminView", component: () => import("../views/manage/AdminView.vue") },
+
+    ],
+    meta: {
+      requiresAuth: true
+    }
   },
+
+  ,
 
   {
     path: '/login',
@@ -38,5 +45,20 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+
+
+router.beforeEach((to, from, next) => {
+  const adminData = JSON.parse(localStorage.getItem("adminData"));
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    if (!adminData) {
+      next({ path: "/login" });
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
+});
+
 
 export default router

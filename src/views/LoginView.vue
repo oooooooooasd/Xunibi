@@ -66,56 +66,63 @@
     </div>
 </template>
 
+
 <script>
-import { Message } from "element-ui";
+import axios from "axios";
 
 export default {
-    name: "LoginView",
+    name: "AdminLogin",
     data() {
         return {
-            // 表单数据
+            loading: false,
             loginForm: {
                 username: "",
                 password: "",
             },
-            // 表单验证规则
             loginRules: {
                 username: [
                     { required: true, message: "请输入账号", trigger: "blur" },
+                    { min: 3, max: 20, message: "账号长度在 3 到 20 个字符之间", trigger: "blur" },
                 ],
                 password: [
                     { required: true, message: "请输入密码", trigger: "blur" },
+                    { min: 6, message: "密码长度至少为 6 个字符", trigger: "blur" },
                 ],
-            },
-            loading: false, // 登录加载状态
-            // 模拟用户数据
-            fakeUserData: {
-                username: "admin",
-                password: "123456",
             },
         };
     },
     methods: {
-        handleLogin() {
-            this.$refs.loginFormRef.validate((valid) => {
-                if (!valid) {
-                    return Message.error("请输入账号和密码！");
-                }
+        async handleLogin() {
+            this.$refs.loginFormRef.validate(async (valid) => {
+                if (valid) {
+                    this.loading = true;
+                    try {
+                        const formData = new URLSearchParams();
+                        formData.append("username", this.loginForm.username);
+                        formData.append("password", this.loginForm.password);
 
-                this.loading = true;
-
-                setTimeout(() => {
-                    if (
-                        this.loginForm.username === this.fakeUserData.username &&
-                        this.loginForm.password === this.fakeUserData.password
-                    ) {
-                        Message.success("登录成功！");
-                        this.$router.push({ path: "/" });
-                    } else {
-                        Message.error("用户名或密码错误，请重试！");
+                        const response = await axios.post("/admins/login", formData, {
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                            },
+                        });
+                        const adminData = response.data;
+                        console.log("adminData : ", adminData);
+                        if (adminData) {
+                            // 假设需要将登录状态保存在 LocalStorage
+                            localStorage.setItem("adminData", JSON.stringify(adminData));
+                            this.$message.success("登录成功！");
+                            this.$router.push("/"); // 跳转到管理员控制台页面
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        this.$message.error(error.response?.data?.message || "登录失败，请重试");
+                    } finally {
+                        this.loading = false;
                     }
-                    this.loading = false;
-                }, 1000);
+                } else {
+                    this.$message.warning("请填写完整的登录信息");
+                }
             });
         },
     },
