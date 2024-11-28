@@ -52,7 +52,10 @@
                     <el-switch v-model="isAvailableBoolean"></el-switch>
                 </el-form-item>
                 <el-form-item label="租用队伍" prop="rentedTeamId">
-                    <el-input type="number" v-model="form.rentedTeamId"></el-input>
+                    <el-select v-model="form.rentedTeamId" placeholder="请选择队伍">
+                        <el-option v-for="team in teams" :key="team.teamId" :label="team.teamName"
+                            :value="team.teamId"></el-option>
+                    </el-select>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -71,6 +74,8 @@ export default {
     components: { RentTable },
     data() {
         return {
+            teams: [], // 团队数据列表
+            teamMap: {}, // 映射 { teamId: teamName }
             activeTab: "工位", // 默认加载的 Tab
             tableData: [], // 当前 Tab 的表格数据
             dialogVisible: false,
@@ -92,6 +97,7 @@ export default {
                 { prop: "coinConsumption", label: "虚拟币价格", width: 100 },
                 { prop: "isAvailable", label: "是否可用", slot: "isAvailableSlot", width: 120 },
                 { prop: "rentedTeamId", label: "租用队伍", width: 200 },
+                { prop: "teamName", label: "租用队伍名称", width: 150 },
             ],
         };
     },
@@ -107,6 +113,24 @@ export default {
         }
     },
     methods: {
+        loadTeams() {
+            axios
+                .get("http://localhost:8080/team/list")
+                .then((response) => {
+                    this.teams = response.data;
+                    this.teamMap = this.teams.reduce((map, team) => {
+                        map[team.teamId] = team.teamName;
+                        return map;
+                    }, {});
+                    // 更新表格数据，确保 teamName 显示正确
+                    this.loadTableData();
+                    console.log("teams:", this.teams);
+                })
+                .catch((error) => {
+                    console.error("加载团队列表失败：", error);
+                    this.$message.error("加载团队列表失败，请稍后重试");
+                });
+        },
         // 通用加载数据方法，根据 activeTab 加载对应数据
         loadTableData() {
             let endpoint = this.getEndpoint();
@@ -114,7 +138,12 @@ export default {
                 .get(endpoint)
                 .then((response) => {
                     console.log(response.data);
-                    this.tableData = response.data.data;
+                    this.data = response.data.data;
+                    this.tableData = this.data.map((item) => ({
+                        ...item,
+                        teamName: this.teamMap[item.rentedTeamId] || "未分配",
+                    }));
+
                 })
                 .catch((error) => {
                     console.error(`加载${this.activeTab}数据失败：`, error);
@@ -302,7 +331,8 @@ export default {
         },
     },
     mounted() {
-        this.loadTableData(); // 默认加载工位数据
+        this.loadTableData();
+        this.loadTeams(); // 默认加载工位数据
     },
 
 };

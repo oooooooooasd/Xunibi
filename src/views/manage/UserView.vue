@@ -189,7 +189,7 @@ export default {
         },
         async del(userId) {
             try {
-                // console.log(userId);
+                console.log(userId);
                 const response = await axios.delete(`http://localhost:8080/user/admindelete/${userId}`);
                 if (response.status === 200) {
                     this.$message.success(response.data.msg);
