@@ -14,8 +14,9 @@
                 </el-table-column>
                 <el-table-column prop="achievementType" label="审核材料类型" align="center" width="150px">
                 </el-table-column>
-                <el-table-column prop="teamId" label="提交团队Id" align="center" width="100px">
+                <el-table-column prop="teamId" label="团队Id" align="center" width="100px">
                 </el-table-column>
+                <el-table-column prop="teamName" label="团队名称" align="center" width="100px"></el-table-column>
                 <el-table-column prop="status" label="审核状态" align="center" width="100px">
                 </el-table-column>
                 <el-table-column label="操作" align="center" width="300px">
@@ -50,6 +51,7 @@ import axios from "axios";
 export default {
     data() {
         return {
+            teamList: [], // 团队数据列表
             searchQuery: null,
             tableData: [], // 假数据容器
             dialogVisible: false, // 控制弹窗显示
@@ -100,25 +102,47 @@ export default {
                 });
         },
 
-        getAchievementList() {
-            axios
-                .get("http://localhost:8080/gain/achievementList")
-                .then((response) => {
-                    console.log("获取待审核列表信息:", response.data);
-                    if (response.data.code === 200) {
+        // getAchievementList() {
+        //     axios
+        //         .get("http://localhost:8080/gain/achievementList")
+        //         .then((response) => {
+        //             console.log("获取待审核列表信息:", response.data);
+        //             if (response.data.code === 200) {
 
-                        this.tableData = response.data.data.map((item) => ({
+        //                 this.tableData = response.data.data.map((item) => ({
+        //                     ...item,
+        //                     material: item.description,
+        //                 })); // 设置待审核成就列表
+        //             } else {
+        //                 this.$message.error(response.data.msg || "获取待审核列表失败");
+        //             }
+        //         })
+        //         .catch((error) => {
+        //             console.error(error);
+        //             this.$message.error("获取待审核列表失败");
+        //         });
+        // },
+
+        async getAchievementList() {
+            try {
+                const [achievementListResponse, teamListResponse] = await Promise.all([
+                    axios.get("http://localhost:8080/gain/achievementList"),
+                    axios.get("http://localhost:8080/team/list"),
+                ]);
+                if (achievementListResponse.data.code === 200 && teamListResponse.status === 200) {
+                    this.tableData = achievementListResponse.data.data.map((item) => {
+                        const team = teamListResponse.data.find((t) => t.teamId === item.teamId);
+                        return {
                             ...item,
                             material: item.description,
-                        })); // 设置待审核成就列表
-                    } else {
-                        this.$message.error(response.data.msg || "获取待审核列表失败");
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                    this.$message.error("获取待审核列表失败");
-                });
+                            teamName: team ? team.teamName : "未知",
+                        }
+                    })
+                }
+            } catch (error) {
+                console.error("获取待审核列表失败:", error);
+                this.$message.error("获取待审核列表失败，请稍后重试");
+            }
         },
 
         openDialog(row) {
